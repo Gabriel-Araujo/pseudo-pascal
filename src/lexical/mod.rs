@@ -62,7 +62,7 @@ impl <'s>Scanner<'s> {
                     c if c.is_alphabetic() || c == '_' => {
                         self.identifier_buffer.push(c);
                         if !(next.is_alphanumeric() || next == '_') {
-                            self.tokens.push(Token::new(&self.identifier_buffer, TokenType::Keyword, self.line, self.column-self.identifier_buffer.len()+1));
+                            self.tokens.push(Token::new(&self.identifier_buffer, TokenType::Identifier, self.line, self.column-self.identifier_buffer.len()+1));
                             self.identifier_buffer = String::new();
                             self.current_state = 0;
                         }
