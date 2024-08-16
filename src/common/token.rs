@@ -11,6 +11,7 @@ pub enum TokenType {
     Assignment, // :=
     AdditiveOperators, // + - or
     MultiplicativeOperators, // * / and
+    Boolean,
     Invalid,
 }
 
@@ -35,6 +36,7 @@ impl fmt::Display for TokenType {
                 TokenType::Assignment => "Assignment",
                 TokenType::AdditiveOperators => "Additive Operators",
                 TokenType::MultiplicativeOperators => "Multiplicative Operators",
+                TokenType::Boolean => "Boolean",
                 TokenType::Invalid => "Invalid",
             }
         )
@@ -56,6 +58,22 @@ impl Token {
     
     pub fn is_type_of(&self, token_type: TokenType) -> bool {
         self.category == token_type
+    }
+    
+    pub fn get_type(&self) -> TokenType {
+        self.category
+    }
+    
+    pub fn get_lexeme(&self) -> &str {
+        &self.lexeme
+    }
+    
+    pub fn get_line(&self) -> usize {
+        self.line
+    }
+    
+    pub fn get_column(&self) -> usize {
+        self.column
     }
 }
 

@@ -161,6 +161,7 @@ impl <'s>Scanner<'s> {
                     if is_keyword(&self.identifier_buffer) {self.tokens.push(Token::new(&self.identifier_buffer, TokenType::Keyword, self.line, self.column-self.identifier_buffer.len()+1))}
                     else if self.identifier_buffer == "and" {self.tokens.push(Token::new(&self.identifier_buffer, TokenType::MultiplicativeOperators, self.line, self.column-self.identifier_buffer.len()+1))}
                     else if self.identifier_buffer == "or" {self.tokens.push(Token::new(&self.identifier_buffer, TokenType::AdditiveOperators, self.line, self.column-self.identifier_buffer.len()+1))}
+                    else if self.identifier_buffer == "true" || self.identifier_buffer == "false" {self.tokens.push(Token::new(&self.identifier_buffer, TokenType::Boolean, self.line, self.column-self.identifier_buffer.len()+1))}
                     else {self.tokens.push(Token::new(&self.identifier_buffer, TokenType::Identifier, self.line, self.column-self.identifier_buffer.len()+1))};
                     self.identifier_buffer = String::new();
                     self.current_state = 0;
