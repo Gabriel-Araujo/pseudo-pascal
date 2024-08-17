@@ -19,7 +19,6 @@ impl Parser {
 
     pub fn init(&mut self) -> Result<bool, Box<dyn Error + Send + Sync + 'static>> {
         self.programa()?;
-        println!("Syntactic parser finished.");
         Ok(true)
     }
 }
@@ -194,7 +193,7 @@ impl Parser {
             self.list_of_parameters_prime()?;
         }
         else if next.get_lexeme() != ")" {
-            return Err(format!("Expected ';'. Instead got {} of type {} at line {} column {}.", 
+            return Err(format!("Expected ';'. Instead got {} of type {} at line {} column {}.",
             next.get_lexeme(), next.get_type(), next.get_line(), next.get_column()))
         }
         Ok(())
