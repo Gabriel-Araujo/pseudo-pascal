@@ -1,28 +1,51 @@
 mod lexical;
 mod common;
+mod syntactic;
 
 use std::fs::File;
 use std::process::exit;
 use std::env;
+use std::error::Error;
 use std::io::Read;
+use std::time::Instant;
 use lexical::Scanner;
+use crate::syntactic::Parser;
 
 fn main() {
     let input =  consume_file(get_file_path()).unwrap();
 
     let mut scanner = Scanner::new(&input);
 
+    let now = Instant::now();
     let tokens = match scanner.init() {
         Ok(values) => {values}
         Err(e) => {
             eprintln!("An error occurred in the lexical parsing.");
             eprintln!("{e}");
-            exit(1);
+            exit(0);
         }
     };
+    
+    println!("Lexical scanner took {}μs.", now.elapsed().as_micros());
 
-    for token in &tokens {
+    /*for token in &tokens {
         println!("{token}");
+    }
+    println!("Parser Start");
+    */
+    
+    let mut parser = Parser::new(&tokens);
+    let now = Instant::now();
+    let a = parser.init();
+    
+    println!("Syntactic parser took {}μs.", now.elapsed().as_micros());
+    match a {
+        Ok(_) => {}
+        Err(e) => {
+            eprintln!("An error occurred in the syntactic parsing.");
+            eprintln!("{e}");
+            exit(0);
+        }
     }
 }
 
