@@ -287,6 +287,10 @@ impl Parser {
             self.list_of_expressions()?;
             self.consume(Delimiter, ")")?;
         }
+        else if next.get_lexeme() == "=" {
+            return Err(format!("Invalid operator. Got '=' at line {} column {}, didn't you mean ':='?"
+            , next.get_line(), next.get_column()))
+        }
         Ok(())
     }
 
