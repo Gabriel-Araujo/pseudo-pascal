@@ -5,7 +5,6 @@ mod syntactic;
 use std::fs::File;
 use std::process::exit;
 use std::env;
-use std::error::Error;
 use std::io::Read;
 use std::time::Instant;
 use lexical::Scanner;

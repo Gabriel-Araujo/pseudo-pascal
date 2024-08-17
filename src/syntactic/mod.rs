@@ -1,5 +1,3 @@
-mod symbols;
-
 use std::error::Error;
 use crate::common::token::{Token, TokenType};
 use crate::common::token::TokenType::*;
@@ -310,11 +308,6 @@ impl Parser {
         Ok(())
     }
 
-    fn variables(&mut self) -> Result<(), String> {
-        self.consume_identifiers()?;
-        Ok(())
-    }
-
     fn list_of_expressions(&mut self) -> Result<(), String> {
         self.expression()?;
         self.list_of_expressions_prime()?;
@@ -397,7 +390,7 @@ impl Parser {
     fn term_prime(&mut self) -> Result<(), String> {
         let next = self.peek()?;
         if next.is_type_of(MultiplicativeOperators) {
-            self.consume_by_type(MultiplicativeOperators)?;
+            self.multiplicative_op()?;
             self.factor()?;
             self.term_prime()?;
         }
