@@ -1,9 +1,13 @@
 use std::error::Error;
+use crate::common::symbol::Symbol;
+use crate::common::symbol::Symbol::{Token as TokenSymbol, ProgramIdentifier, EOS};
 use crate::common::token::{Token, TokenType};
 use crate::common::token::TokenType::*;
 
 pub struct Parser {
     tokens_buffer: Vec<Token>,
+    symbol_table: Vec<Symbol>,
+    program_name: String,
 }
 
 impl Parser {
@@ -12,11 +16,19 @@ impl Parser {
         temp.reverse();
         Self {
             tokens_buffer: temp,
+            symbol_table: vec![],
+            program_name: "".to_string(),
         }
     }
 
     pub fn init(&mut self) -> Result<bool, Box<dyn Error + Send + Sync + 'static>> {
         self.programa()?;
+
+        
+        for item in self.symbol_table.iter().rev() {
+            println!("{item}")
+        }
+
         Ok(true)
     }
 }
@@ -29,6 +41,7 @@ impl Parser {
         self.compound_command()?;
 
         self.consume(Delimiter, ".")?;
+        self.remove_scope();
 
         Ok(())
     }
@@ -36,7 +49,12 @@ impl Parser {
     // Aqui começa a produção de program
     fn program(&mut self) -> Result<(), String>{
         self.consume(Keyword, "program")?;
-        self.consume_identifiers()?;
+        
+        self.symbol_table.push(EOS); // Criação do escopo global
+        let token = self.consume_identifiers()?;
+        self.program_name = token.get_lexeme().to_string();
+        self.add_symbol(TokenSymbol(token))?;
+        
         self.consume(Delimiter, ";")?;
 
         Ok(())
@@ -85,8 +103,9 @@ impl Parser {
     }
     
     fn list_of_identifiers(&mut self) -> Result<(), String> {
-        self.consume_identifiers()?;
-        
+        let token = self.consume_identifiers()?;
+        self.add_symbol(TokenSymbol(token))?; // Adiciona o identificador à tabela de símbolos
+
         self.list_of_identifiers_prime()?;
         Ok(())
     }
@@ -96,8 +115,9 @@ impl Parser {
         
         if comma.get_lexeme() == "," { 
             self.tokens_buffer.pop();
-            self.consume_identifiers()?;
-            
+            let token = self.consume_identifiers()?;
+            self.add_symbol(TokenSymbol(token))?; // Adiciona o identificador à tabela de símbolos
+
             self.list_of_identifiers_prime()?;
         }
         
@@ -139,8 +159,9 @@ impl Parser {
     fn subprogram_declaration(&mut self) -> Result<(), String> {
         self.consume(Keyword, "procedure")?;
         
-        self.consume_identifiers()?;
-
+        let token = self.consume_identifiers()?;
+        self.add_symbol(TokenSymbol(token))?;
+        self.symbol_table.push(EOS);
         self.arguments()?;
 
         self.consume(Delimiter, ";")?;
@@ -150,6 +171,7 @@ impl Parser {
         self.subprograms_declaration()?;
         
         self.compound_command()?;
+        self.remove_scope();
         Ok(())
     }
     
@@ -268,7 +290,8 @@ impl Parser {
     }
 
     fn command_prime(&mut self) -> Result<(), String> {
-        self.consume_identifiers()?;
+        let token = self.consume_identifiers()?;
+        self.symbol_exists(&Symbol::Token(token))?;
         self.command_dual_prime()?;
         Ok(())
     }
@@ -293,7 +316,8 @@ impl Parser {
     }
 
     fn procedure_activation(&mut self) -> Result<(), String> {
-        self.consume_identifiers()?;
+        let token = self.consume_identifiers()?;
+        self.symbol_exists(&Symbol::Token(token))?;
         self.procedure_activation_prime()?;
         Ok(())
     }
@@ -450,42 +474,83 @@ impl Parser {
     }
 
     // Não funciona com identificadores e números
-    fn consume(&mut self, expected_type: TokenType, expected_lexeme: &str) -> Result<(), String> {
+    fn consume(&mut self, expected_type: TokenType, expected_lexeme: &str) -> Result<Token, String> {
         match self.tokens_buffer.pop() {
-            None => { return Err("Syntactic error. Unexpected end of file.".to_string()); }
+            None => { Err("Syntactic error. Unexpected end of file.".to_string()) }
             Some(value) => {
                 if !(value.is_type_of(expected_type) && value.get_lexeme() == expected_lexeme) {
                     return Err(format!("Expected {} '{}'. Instead got '{}' of type {} at line {} column {}",
                                        expected_type, expected_lexeme, value.get_lexeme(), value.get_type(), value.get_line(), value.get_column()));
                 }
+                Ok(value)
             }
         }
-        Ok(())
     }
 
-    fn consume_identifiers(&mut self) -> Result<(), String> {
+    fn consume_identifiers(&mut self) -> Result<Token, String> {
         match self.tokens_buffer.pop() {
-            None => { return Err("Syntactic error. Unexpected end of file.".to_string()); }
+            None => { Err("Syntactic error. Unexpected end of file.".to_string()) }
             Some(value) => {
                 if !value.is_type_of(Identifier) {
                     return Err(format!("Expected an identifier. Instead got '{}' of type {} at line {} column {}",
                         value.get_lexeme(), value.get_type(), value.get_line(), value.get_column()));
                 }
+                Ok(value)
             }
         }
-        Ok(())
     }
 
-    fn consume_by_type(&mut self, expected_type: TokenType) -> Result<(), String> {
+    fn consume_by_type(&mut self, expected_type: TokenType) -> Result<Token, String> {
         match self.tokens_buffer.pop() {
-            None => { return Err("Syntactic error. Unexpected end of file.".to_string()); }
+            None => { Err("Syntactic error. Unexpected end of file.".to_string()) }
             Some(value) => {
                 if !value.is_type_of(expected_type) {
                     return Err(format!("Expected {}. Instead got '{}' of type {} at line {} column {}",
                                        expected_type, value.get_lexeme(), value.get_type(), value.get_line(), value.get_column()));
                 }
+                Ok(value)
             }
         }
+    }
+
+    fn add_symbol(&mut self, symbol: Symbol) -> Result<(), String> {
+        if symbol == EOS { panic!("Wrong use of End of Scope"); }
+        let mut buffer = self.symbol_table.iter().rev();
+        let mut buffer_symbol = buffer.next().unwrap();
+
+        while buffer_symbol != &EOS {
+            if buffer_symbol == &symbol {
+                return Err(format!("Identifier '{}' already declared in line {} column {}.",
+                    buffer_symbol.as_token().unwrap().get_lexeme(), buffer_symbol.as_token().unwrap().get_line(), buffer_symbol.as_token().unwrap().get_column()));
+            }
+            buffer_symbol = buffer.next().unwrap();
+        }
+
+        self.symbol_table.push(symbol);
         Ok(())
+    }
+    
+    fn symbol_exists(&self, symbol: &Symbol) -> Result<(), String> {
+        if symbol == &EOS { panic!("Wrong use of End of Scope"); }
+        let temp = symbol.as_token().unwrap();
+        
+        if temp.get_lexeme() == self.program_name {
+            return Err(format!("Use of the program name at line {} column {}.", temp.get_line(), temp.get_column()))
+        }
+        
+        match self.symbol_table.iter().find(|item| item == &symbol) {
+            None => {
+                Err(format!("Use of the undeclared identifier '{}' at line {} column {}.",
+                            temp.get_lexeme(), temp.get_line(), temp.get_column()))
+            }
+            Some(_) => { Ok(()) }
+        }
+        
+    }
+
+    fn remove_scope(&mut self) {
+        loop {
+            if self.symbol_table.pop() == Some(EOS) {break;}
+        }
     }
 }

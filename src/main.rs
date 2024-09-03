@@ -13,8 +13,9 @@ use crate::syntactic::Parser;
 fn main() {
     let input =  consume_file(get_file_path()).unwrap();
 
-    let mut scanner = Scanner::new(&input);
 
+    let mut scanner = Scanner::new(&input);
+    
     let now = Instant::now();
     let tokens = match scanner.init() {
         Ok(values) => {values}
