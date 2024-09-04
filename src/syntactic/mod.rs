@@ -1,6 +1,6 @@
 use std::error::Error;
 use crate::common::symbol::Symbol;
-use crate::common::symbol::Symbol::{Token as TokenSymbol, ProgramIdentifier, EOS};
+use crate::common::symbol::Symbol::{Token as TokenSymbol, EOS};
 use crate::common::token::{Token, TokenType};
 use crate::common::token::TokenType::*;
 

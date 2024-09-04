@@ -221,6 +221,7 @@ impl <'s>Scanner<'s> {
             },
             15 => {
                 if current == '}' { self.current_state = 0; }
+                else if current == '\n' { return Err(Box::from(format!("Unclosed comment at line {}", self.line))) }
             }
             _ => {return Err(Box::from(InvalidStateError::new("Reached an invalid end state on lexial analysis.", self.line, self.column)))}
         }

@@ -46,7 +46,7 @@ begin
    if chave then 
 
       if x <> z then {substitua x por chave} 
- 
+
          z := 5.0 {troque "5.0" por "test1" e veja se gera erro "Nome do programa n�o pode ser usado"}
   
       else
