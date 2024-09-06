@@ -24,12 +24,14 @@ var			{Existem diversos erros que podem ser gerados neste arquivo. Alguns exempl
   
   begin
 
-     resultado := 0;
+     resultado := 1;
+     chave := (5>4) and true;
       
      {LimparTela; adicione este procedimento}
+     LimparTela;
      while (entrada>0) do {no lugar de "entrada" use "input" e veja se gera o erro "vari�vel n�o declarada" }
                          resultado := resultado + entrada;
-     entrada := entrada - 1		{troque "1" por "chave" e veja se gera o erro "tipos incompat�veis"}	
+     entrada := entrada - 1		{troque "1" por "chave" e veja se gera o erro "tipos incompat�veis"}
      
   end;
 
@@ -45,7 +47,7 @@ begin
   
    if chave then 
 
-      if x <> z then {substitua x por chave} 
+      if x <> z then {substitua x por chave}
 
          z := 5.0 {troque "5.0" por "test1" e veja se gera erro "Nome do programa n�o pode ser usado"}
   
