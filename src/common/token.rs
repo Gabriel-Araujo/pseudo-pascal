@@ -5,7 +5,7 @@ pub enum TokenType {
     Keyword, // program, var, integer, real, boolean, procedure, begin, end, if, then, else, while, do, not
     Identifier, // [a-z|A-Z]+[0-9]*[_]*
     Integer, // [0-9]+
-    Real, // [0-9]+.[0-9]*
+    Real,    // [0-9]+.[0-9]*
     Delimiter, // ; . : ( ) ,
     RelationalOperators, // = < > <= >= <>
     Assignment, // :=
@@ -53,25 +53,30 @@ pub struct Token {
 
 impl Token {
     pub fn new(lexeme: &str, category: TokenType, line: usize, column: usize) -> Self {
-        Token {lexeme: lexeme.trim().to_string(), category, line, column}
+        Token {
+            lexeme: lexeme.trim().to_string(),
+            category,
+            line,
+            column,
+        }
     }
-    
+
     pub fn is_type_of(&self, token_type: TokenType) -> bool {
         self.category == token_type
     }
-    
+
     pub fn get_type(&self) -> TokenType {
         self.category
     }
-    
+
     pub fn get_lexeme(&self) -> &str {
         &self.lexeme
     }
-    
+
     pub fn get_line(&self) -> usize {
         self.line
     }
-    
+
     pub fn get_column(&self) -> usize {
         self.column
     }
@@ -85,6 +90,10 @@ impl PartialEq for Token {
 
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "['{}', {}, line: {}, column: {}]", self.lexeme, self.category, self.line, self.column)
+        write!(
+            f,
+            "['{}', {}, line: {}, column: {}]",
+            self.lexeme, self.category, self.line, self.column
+        )
     }
 }

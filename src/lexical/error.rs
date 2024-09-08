@@ -1,5 +1,5 @@
-use std::fmt;
 use std::error::Error;
+use std::fmt;
 
 #[derive(Debug, Clone)]
 pub struct InvalidCharError {
@@ -8,21 +8,27 @@ pub struct InvalidCharError {
     pub column: usize,
 }
 
-impl InvalidCharError  {
+impl InvalidCharError {
     pub fn new(character: char, line: usize, column: usize) -> Self {
-        Self {character, line, column}
+        Self {
+            character,
+            line,
+            column,
+        }
     }
 }
 
 impl fmt::Display for InvalidCharError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result <(), fmt::Error> {
-        write!(f, "The invalid character '{}' was fount at line {}, column {}",
-               self.character, self.line, self.column)
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(
+            f,
+            "The invalid character '{}' was fount at line {}, column {}",
+            self.character, self.line, self.column
+        )
     }
 }
 
 impl Error for InvalidCharError {}
-
 
 #[derive(Debug, Clone)]
 pub struct InvalidStateError {
@@ -31,17 +37,23 @@ pub struct InvalidStateError {
     pub column: usize,
 }
 
-
-impl InvalidStateError  {
+impl InvalidStateError {
     pub fn new(message: &str, line: usize, column: usize) -> Self {
-        Self {message: message.to_string(), line, column}
+        Self {
+            message: message.to_string(),
+            line,
+            column,
+        }
     }
 }
 
 impl fmt::Display for InvalidStateError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result <(), fmt::Error> {
-        write!(f, "An error occurred at line {}, column {}.\n{}",
-               self.line, self.column, self.message)
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(
+            f,
+            "An error occurred at line {}, column {}.\n{}",
+            self.line, self.column, self.message
+        )
     }
 }
 
